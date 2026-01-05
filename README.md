@@ -24,7 +24,7 @@ Simply test one of the host defines in the host like file, eg.
 ```sh
 sudo ./add-parental-control.sh <path to the ini file>
 ```
-The ini file has to be in the following format:
+The ini file has to be in the following format. Note that there can be added more `block_cron` and `allow_cron` configurations, e.g. you want to set specific rule for weekday and weekend
 ```ini
 [metadata]
 kid_name=<rulename>
