@@ -1,11 +1,14 @@
 # Unbound Parental Control
-Simple minimalistic script to install unbound on Raspberry with parental control. Tested on Raspberry Pi Zero (512MB RAM) running DietPi.
 
-As any father of a 10 years old son I'm dealing with starting addition to online games such Roblox or Bloxio and youtube. Of course there're some commercial products on the market, but I don't want to pay something I can build by my own. In addition I'm running a homelab with several docker-based services, so I decided to combine these two requirements a setup a simple `unbound` server on my local LAN.
+A minimalistic script to deploy [Unbound](https://nlnetlabs.nl/projects/unbound/about/) on Raspberry Pi devices, enhancing DNS resolution with parental control capabilities. This project has been tested on Raspberry Pi Zero (512MB RAM) running [DietPi](https://dietpi.com/).
 
+As a parent, managing children’s screen time and access to online games such as Roblox and Bloxio, as well as YouTube, is a growing challenge. While commercial solutions exist, this project aims to provide a privacy-respecting, cost-effective alternative for home networks.
 
-# 🚩 Basic installation
-## Clone the repository
+---
+
+## 🚩 Basic Installation
+
+### 1. Clone the Repository
 
 ```sh
 cd /tmp
@@ -13,80 +16,128 @@ git clone https://github.com/lhotakj/unbound-parental-control.git
 cd unbound-parental-control
 ```
 
-## Install Unbound and setup the local-lan 
-Install the unbound and sets the upstream servers to AdGuard DNS servers blocking ads and sets custom A records defined in the hosts like file
+### 2. Install Unbound and Configure Local Network
+
+This script installs Unbound and configures upstream DNS servers to use [AdGuard DNS](https://adguard.com/en/adguard-dns/overview.html) for ad-blocking purposes. You can also define custom A records via a hosts-like file.
+
+To install and set up Unbound:
+
 ```sh
-sudo ./install-unbound.sh <path to own hosts like file>
+sudo ./install-unbound.sh <host_file_path>
 ```
 
-Example:
+**Example:**
 ```sh
 sudo ./install-unbound.sh ./conf/local-lan.txt
 ```
+- `<host_file_path>` should point to a plaintext file formatted similarly to `/etc/hosts`, listing custom domain mappings.
 
-## Test if local A type addreses are properly set
-Simply test one of the host defines in the host like file, eg.
+### 3. Verify Local A Record Resolution
+
+Test DNS resolution for a configured hostname to ensure the setup is functioning:
+
 ```sh
- dig @localhost amd
+dig @localhost amd
 ```
 
-# ⛔ Parental Control
-## Add parental control
+Replace `amd` with any hostname you defined in your hosts file.
+
+---
+
+## ⛔ Parental Control
+
+### Add Parental Control Rules
+
+Add parental control rules using an INI configuration file. This file enables granular control over which domains are accessible from specific devices, based on cron-style schedules.
+
 ```sh
-sudo ./add-parental-control.sh <path to the ini file>
+sudo ./add-parental-control.sh <config_file_path>
 ```
-The ini file has to be in the following format. Note that there can be added more `block_cron` and `allow_cron` configurations, e.g. you want to set specific rule for weekday and weekend
+
+#### INI File Format
+
+The INI file should follow this structure:
+
 ```ini
 [metadata]
-kid_name=<rulename>
-block_cron=<valid cron expression when to block defined domains>
-allow_cron=<valid cron expression when to unblock defined domains>
+kid_name=<rule_name>
+block_cron=<cron_expression_for_blocking>
+allow_cron=<cron_expression_for_allowing>
 
 [domains]
-<domain 1>
-<domain 2>
+domain1.com
+domain2.net
 ...
 
 [devices]
-<ip 1>
-<ip 2>
+10.0.0.2
+10.0.0.3
 ...
 ```
-Example:
+- You may specify multiple `block_cron` and `allow_cron` rules to customize schedules, such as for weekdays and weekends.
+- Domains should be listed one per line under `[domains]`.
+- Device IPs should be listed one per line under `[devices]`.
+
+**Example:**
 ```sh
 sudo ./add-parental-control.sh ./conf/jonas.ini
 ```
 
-## Remove parental control
+### Remove Parental Control Rules
+
+To remove previously configured parental control rules, run:
+
 ```sh
 sudo ./add-parental-control.sh ./conf/jonas.ini
 ```
 
-# 🪲 Debugging / testing hints
+---
 
-## Test if parental block works (domain `youtube.com` on host `10.0.2.2` is blacklisted and it's outside allowed time)
+## 🪲 Debugging and Testing
+
+### Testing Parental Blocking
+Test blocking for a domain (e.g., `youtube.com`) from a restricted host IP (e.g., `10.0.2.2`), outside allowed hours:
+
+```sh
+sudo dig +short youtube.com @127.0.0.1 -b 10.0.2.2
 ```
-# sudo dig +short youtube.com @127.0.0.1 -b 10.0.2.2
-;; UDP setup with 127.0.0.1#53(127.0.0.1) for youtube.com failed: address not available.
-;; no servers could be reached
-;; UDP setup with 127.0.0.1#53(127.0.0.1) for youtube.com failed: address not available.
-;; no servers could be reached
+Result:
+```
 ;; UDP setup with 127.0.0.1#53(127.0.0.1) for youtube.com failed: address not available.
 ;; no servers could be reached
 ```
 
-## Positive test (domain `youtube.com` from localhost)
+### Positive DNS Test
+
+To verify that allowed domains resolve correctly (e.g., from localhost):
+
+```sh
+sudo dig +short youtube.com @127.0.0.1
 ```
-# sudo dig +short youtube.com @127.0.0.1
+Expected output:
+```
 142.251.141.174
 ```
 
-## How to list cached DNS entries
-```
+### Viewing Cached DNS Entries
+
+To list current cached DNS A records in Unbound:
+
+```sh
 unbound-control dump_cache | grep -E "IN[[:space:]]+A[[:space:]]"
 ```
 
+---
 
+## Additional Notes
 
+- **Security:** Always ensure your Raspberry Pi’s OS and Unbound are up-to-date to mitigate vulnerabilities.
+- **Customization:** You can extend domain and schedule lists as required. Multiple configuration files can be managed for different users and devices.
+- **Support & Contributions:** Please open issues or pull requests on [GitHub](https://github.com/lhotakj/unbound-parental-control) for bug reports, enhancements, or feature requests.
 
+---
 
+**References**
+- [Unbound DNS documentation](https://nlnetlabs.nl/documentation/unbound/)
+- [AdGuard DNS](https://adguard.com/en/adguard-dns/overview.html)
+- [DietPi](https://dietpi.com/)
