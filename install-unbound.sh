@@ -44,6 +44,11 @@ forward-zone:
     forward-addr: 94.140.15.15
     forward-addr: 2a10:50c0::ad1:ff
     forward-addr: 2a10:50c0::ad2:ff
+
+remote-control:
+  control-enable: yes
+  control-interface: 127.0.0.1
+  control-port: 8953    
 EOF
 
 echo "=== Running unbound-archor ==="
