@@ -60,5 +60,31 @@ sudo ./add-parental-control.sh ./conf/jonas.ini
 sudo ./add-parental-control.sh ./conf/jonas.ini
 ```
 
+# Debugging hints
+
+## Test if parental block works (domain `youtube.com` on host `10.0.2.2` is blacklisted and it's outside allowed time)
+```
+# sudo dig +short youtube.com @127.0.0.1 -b 10.0.2.2
+;; UDP setup with 127.0.0.1#53(127.0.0.1) for youtube.com failed: address not available.
+;; no servers could be reached
+;; UDP setup with 127.0.0.1#53(127.0.0.1) for youtube.com failed: address not available.
+;; no servers could be reached
+;; UDP setup with 127.0.0.1#53(127.0.0.1) for youtube.com failed: address not available.
+;; no servers could be reached
+```
+
+## Positive test (domain `youtube.com` from localhost)
+```
+# sudo dig +short youtube.com @127.0.0.1
+142.251.141.174
+```
+
+## How to list cached DNS entries
+```
+unbound-control dump_cache | grep -E "IN[[:space:]]+A[[:space:]]"
+```
+
+
+
 
 
