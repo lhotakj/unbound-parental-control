@@ -205,6 +205,34 @@ echo "Reloading Unbound..."
 unbound-control reload || systemctl reload unbound
 
 ############################################
+### TRIGGER THE CRON TO APPLY THE RULE
+############################################
+
+echo "Triggering cron to apply the rule..."
+
+now=$(date '+%M %H %d %m %u')
+symlink_set=0
+
+for i in "${!allow_cron[@]}"; do
+  cron_expr="${allow_cron[$i]}"
+  if [[ $(echo "$now $cron_expr" | awk '{exit system("echo \""$0"\" | at now") == 0 ? 0 : 1}') -eq 0 ]]; then
+    ln -sf "$ALLOW_FILE" "$CURRENT_FILE"
+    symlink_set=1
+    break
+  fi
+done
+
+if [[ $symlink_set -eq 0 ]]; then
+  for i in "${!block_cron[@]}"; do
+    cron_expr="${block_cron[$i]}"
+    if [[ $(echo "$now $cron_expr" | awk '{exit system("echo \""$0"\" | at now") == 0 ? 0 : 1}') -eq 0 ]]; then
+      ln -sf "$BLOCK_FILE" "$CURRENT_FILE"
+      break
+    fi
+  done
+fi
+
+############################################
 ### DONE
 ############################################
 
