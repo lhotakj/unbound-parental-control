@@ -33,7 +33,8 @@ EOF
 echo "=== Writing minimal Unbound config (no global blocking) ==="
 cat > /etc/unbound/unbound.conf <<EOF
 server:
-    interface: 0.0.0.0
+    interface: 0.0.0.0         # Listen on all IPv4 addresses
+    interface: ::0             # Listen on all IPv6 addresses    
     access-control: 0.0.0.0/0 allow
     include: /etc/unbound/custom/local-lan.conf
 
