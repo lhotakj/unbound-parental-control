@@ -165,13 +165,9 @@ mkdir -p "$UNBOUND_DIR/unbound.conf.d"
   echo "view:"
   echo "  name: \"$kid_name\""
   echo "  view-first: yes"
-  echo ""
-
   for ip in "${devices[@]}"; do
     echo "  access-control: $ip allow"
   done
-
-  echo ""
   echo "  include: \"$CURRENT_FILE\""
 } > "$VIEW_FILE"
 
