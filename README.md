@@ -1,5 +1,7 @@
-# unbound-parental-control
-Simple script to install unbound on raspberry with parental control. Tested on Raspberry Pi Zero running DietPi.
+# Unbound Parental Control
+Simple minimalistic script to install unbound on Raspberry with parental control. Tested on Raspberry Pi Zero (512MB RAM) running DietPi.
+
+As any father of a 10 years old son I'm dealing with starting addition to online games such Roblox or Bloxio and youtube. Of course there're some commercial products on the market, but I don't want to pay something I can build by my own. In addition I'm running a homelab with several docker-based services, so I decided to combine these two requirements a setup a simple `unbound` server on my local LAN.
 
 
 # 🚩 Basic installation
