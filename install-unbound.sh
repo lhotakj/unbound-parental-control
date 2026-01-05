@@ -48,11 +48,14 @@ forward-zone:
 remote-control:
   control-enable: yes
   control-interface: 127.0.0.1
-  control-port: 8953    
+  control-port: 8953
 EOF
 
 echo "=== Running unbound-archor ==="
 sudo unbound-anchor -a /var/lib/unbound/root.key
+
+echo "=== Creating unbound-control keys ==="
+sudo unbound-control-setup
 
 echo "=== Restarting Unbound ==="
 unbound-checkconf
