@@ -45,6 +45,9 @@ forward-zone:
     forward-addr: 2a10:50c0::ad2:ff
 EOF
 
+echo "=== Running unbound-archor ==="
+sudo unbound-anchor -a /var/lib/unbound/root.key
+
 echo "=== Restarting Unbound ==="
 unbound-checkconf
 systemctl restart unbound
