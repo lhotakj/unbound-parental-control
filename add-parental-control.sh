@@ -212,62 +212,67 @@ echo "Determining which rule to apply .."
 # Helper: get last matching time for a cron rule before now
 get_last_cron_time() {
   local cron_expr="$1"
-  local now=$(date +'%M %H %d %m %u %s')
-  local min hour day mon dow now_ts
-  read min hour day mon dow now_ts <<< "$now"
-
-  # Only support single values (no ranges/lists/steps)
+  local now_ts=$(date +%s)
   local cmin chour cday cmon cdow
   read cmin chour cday cmon cdow <<< "$cron_expr"
 
+  # Support comma-separated DOW
+  IFS=',' read -ra dows <<< "$cdow"
+  [[ "$cdow" == "*" ]] && dows=("*")
+
   # Try today, then go back up to 7 days
   for ((i=0; i<7; i++)); do
-    try_day=$(date -d "$i day ago" +'%d %m %u')
-    read tday tmon tdow <<< "$try_day"
-    if { [[ $cday == "*" || $cday == $tday ]] && \
-         [[ $cmon == "*" || $cmon == $tmon ]] && \
-         [[ $cdow == "*" || $cdow == $tdow ]]; }; then
-      tstamp=$(date -d "$tmon/$tday $(date +%Y) $chour:$cmin" +%s 2>/dev/null)
-      if [[ $tstamp && $tstamp -le $now_ts ]]; then
-        echo $tstamp
-        return
+    try_date=$(date -d "$i day ago" +'%Y %m %d %u')
+    read y m d dow <<< "$try_date"
+    for test_dow in "${dows[@]}"; do
+      if { [[ $cday == "*" || $cday == $d ]] && \
+           [[ $cmon == "*" || $cmon == $m ]] && \
+           [[ $test_dow == "*" || $test_dow == $dow ]]; }; then
+        tstamp=$(date -d "$y-$m-$d $chour:$cmin" +%s 2>/dev/null)
+        if [[ $tstamp && $tstamp -le $now_ts ]]; then
+          echo $tstamp
+          return
+        fi
       fi
-    fi
+    done
   done
   echo 0
 }
 
 now_ts=$(date +%s)
-last_allow_ts=0
-last_block_ts=0
+best_ts=0
+best_type=""
+best_idx=-1
 
-for cron_expr in "${allow_cron[@]}"; do
-  ts=$(get_last_cron_time "$cron_expr")
-  if [[ $ts -gt $last_allow_ts ]]; then
-    last_allow_ts=$ts
+# Check all allow_cron rules
+for idx in "${!allow_cron[@]}"; do
+  ts=$(get_last_cron_time "${allow_cron[$idx]}")
+  if [[ $ts -gt $best_ts ]]; then
+    best_ts=$ts
+    best_type="allow"
+    best_idx=$idx
   fi
 done
 
-for cron_expr in "${block_cron[@]}"; do
-  ts=$(get_last_cron_time "$cron_expr")
-  if [[ $ts -gt $last_block_ts ]]; then
-    last_block_ts=$ts
+# Check all block_cron rules
+for idx in "${!block_cron[@]}"; do
+  ts=$(get_last_cron_time "${block_cron[$idx]}")
+  if [[ $ts -gt $best_ts ]]; then
+    best_ts=$ts
+    best_type="block"
+    best_idx=$idx
   fi
 done
 
-if [[ $last_allow_ts -ge $last_block_ts ]]; then
-  echo "Applying allow rule for $rule ..."
+if [[ $best_type == "allow" ]]; then
+  echo "Applying allow rule for $rule (matched: ${allow_cron[$best_idx]})"
   ln -sf "$ALLOW_FILE" "$CURRENT_FILE"
   unbound-control reload || systemctl reload unbound
 else
-  echo "Applying block rule for $rule ..."
+  echo "Applying block rule for $rule (matched: ${block_cron[$best_idx]})"
   ln -sf "$BLOCK_FILE" "$CURRENT_FILE"
   unbound-control reload || systemctl reload unbound
 fi
-
-
-
-
 
 ############################################
 ### DONE
