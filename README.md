@@ -24,7 +24,12 @@ _Service_: Unbound DNS / cron
 
 ## 🚩 Basic Installation
 
+The `./conf` folder contains sample configuration files for demonstration purposes. 
+To customize for your environment, fork this repository and replace them with your own configuration files. You can create multiple `*.ini` files to define different rule sets as needed.
+
 ### 1. Clone the Repository
+
+You can clone this repository to any directory. While `~/amanagate` works fine, using `/opt/amanagate` is recommended if you want seamless upgrades when a planned web-based administration interface is released.
 
 ```sh
 rm -rf /opt/amanagate
