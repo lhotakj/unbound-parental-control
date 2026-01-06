@@ -26,13 +26,14 @@ mkdir -p /etc/unbound/unbound.conf.d
 
 echo "=== Creating LAN DNS overrides ==="
 cat > /etc/unbound/custom/local-lan.conf <<EOF
-$(grep -v '^\s*#' "$HOST_FILE" | grep -v '^\s*$' | while read -r ip name; do
+$(grep -v '^[[:space:]]*#' "$HOST_FILE" | grep -v '^[[:space:]]*$' | while read -r ip name; do
     # Skip lines that don't have both IP and domain
     if [[ -n "$ip" && -n "$name" ]]; then
       echo "local-data: \"$name A $ip\""
     fi
 done)
 EOF
+
 
 echo "=== Writing minimal Unbound config (no global blocking) ==="
 cat > /etc/unbound/unbound.conf <<EOF
