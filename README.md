@@ -27,9 +27,10 @@ _Service_: Unbound DNS / cron
 ### 1. Clone the Repository
 
 ```sh
-cd /tmp
-git clone https://github.com/lhotakj/amanagate.git
-cd amanagate
+rm -rf /opt/amanagate
+mkdir -p /opt/amanagate
+git clone https://github.com/lhotakj/amanagate.git /opt/amanagate 
+cd /opt/amanagate
 ```
 
 ### 2. Install Unbound and Configure Local Network
@@ -39,12 +40,12 @@ This script installs Unbound and configures upstream DNS servers to use [AdGuard
 To install and set up Unbound:
 
 ```sh
-sudo ./install-unbound.sh <host_file_path>
+sudo ./install.sh <host_file_path>
 ```
 
 **Example:**
 ```sh
-sudo ./install-unbound.sh ./conf/local-lan.txt
+sudo ./install.sh ./conf/local-lan.txt
 ```
 - `<host_file_path>` should point to a plaintext file formatted similarly to `/etc/hosts`, listing custom domain mappings.
 
@@ -55,8 +56,17 @@ Test DNS resolution for a configured hostname to ensure the setup is functioning
 ```sh
 dig @localhost amd
 ```
-
 Replace `amd` with any hostname you defined in your hosts file.
+
+
+### 4. Uninstall Unbound and the entire configuration
+
+This script removes AmanaGate including the configuration 
+
+
+```sh
+sudo ./uninstall.sh
+```
 
 ---
 
@@ -104,8 +114,9 @@ sudo ./add-parental-control.sh ./conf/jonas.ini
 To remove previously configured parental control rules, run:
 
 ```sh
-sudo ./add-parental-control.sh ./conf/jonas.ini
+sudo ./remove-parental-control.sh ./conf/jonas.ini
 ```
+
 
 ---
 
