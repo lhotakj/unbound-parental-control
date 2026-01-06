@@ -1,7 +1,11 @@
-# AmanaGate
-AmanaGate is a lightweight, high-performance deployment framework for Unbound DNS, specifically optimized for resource-constrained environments like the Raspberry Pi Zero.
 
+# AmanaGate
+<img src="https://github.com/lhotakj/amanagate/blob/9fb7474ed7693aad5fed1e2c7ded8f4b3c0dfb54/logo.png?raw=true" align="right" width="200" alt="AmanaGate Logo">
+AmanaGate is a lightweight, high-performance tool based on Unbound DNS, specifically optimized for resource-constrained environments like the Raspberry Pi Zero.
 The name derives from the Arabic/Swahili word "Amana", representing trust or something held in safekeeping. True to its name, AmanaGate serves as a "Trust Gateway" for your home network, providing parents with granular control over digital boundaries without compromising privacy or performance.
+
+
+
 
 ## 🚀 Overview
 AmanaGate transforms a standard Raspberry Pi into a dedicated recursive DNS resolver. By intercepting requests at the network level, it allows for the seamless management of access to gaming platforms (Roblox, Bloxio), social media, and streaming services like YouTube—all through a privacy-first, self-hosted architecture.
@@ -13,7 +17,7 @@ AmanaGate transforms a standard Raspberry Pi into a dedicated recursive DNS reso
 * Recursive Resolution: Improves security by communicating directly with Root Nameservers.
 * Custom DNS A record management: Allows you to refine own DNS records in a friendly `hosts` file format
 
-🛠 Target Environment
+## 🛠 Target Environment
 _Hardware_: Raspberry Pi Series (Optimized for Zero/Zero W)
 _OS_: DietPi (recommended) or any Debian-based distributions (Ubuntu, Kubuntu, etc.)
 _Service_: Unbound DNS / cron
