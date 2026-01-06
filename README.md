@@ -2,7 +2,7 @@
 # AmanaGate
 <img src="https://github.com/lhotakj/amanagate/blob/9fb7474ed7693aad5fed1e2c7ded8f4b3c0dfb54/logo.png?raw=true" align="right" width="200" alt="AmanaGate Logo">
 AmanaGate is a lightweight, high-performance tool based on Unbound DNS, specifically optimized for resource-constrained environments like the Raspberry Pi Zero.
-The name derives from the Arabic/Swahili word "Amana", representing trust or something held in safekeeping. True to its name, AmanaGate serves as a "Trust Gateway" for your home network, providing parents with granular control over digital boundaries without compromising privacy or performance.
+The name derives from the Arabic/Swahili word "Amana", representing trust or something held in safekeeping. True to its name, AmanaGate serves as a "trust gateway" for your home network, providing parents with granular control over digital boundaries without compromising privacy or performance.
 
 
 
