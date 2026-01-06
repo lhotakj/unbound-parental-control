@@ -209,32 +209,42 @@ unbound-control reload || systemctl reload unbound
 
 echo "Determining which rule to apply .."
 
-# Helper: get last matching time for a cron rule before now
+# Returns 0 if $2 matches $1 (cron DOW field, e.g. "1,2,5-7"), else 1
+cron_dow_match() {
+  local cron_dow="$1"
+  local cur_dow="$2"
+  [[ "$cron_dow" == "*" ]] && return 0
+  IFS=',' read -ra parts <<< "$cron_dow"
+  for part in "${parts[@]}"; do
+    if [[ "$part" == *-* ]]; then
+      IFS='-' read start end <<< "$part"
+      if (( cur_dow >= start && cur_dow <= end )); then return 0; fi
+    elif [[ "$part" == "$cur_dow" ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
 get_last_cron_time() {
   local cron_expr="$1"
   local now_ts=$(date +%s)
   local cmin chour cday cmon cdow
   read cmin chour cday cmon cdow <<< "$cron_expr"
 
-  # Support comma-separated DOW
-  IFS=',' read -ra dows <<< "$cdow"
-  [[ "$cdow" == "*" ]] && dows=("*")
-
   # Try today, then go back up to 7 days
   for ((i=0; i<7; i++)); do
     try_date=$(date -d "$i day ago" +'%Y %m %d %u')
     read y m d dow <<< "$try_date"
-    for test_dow in "${dows[@]}"; do
-      if { [[ $cday == "*" || $cday == $d ]] && \
-           [[ $cmon == "*" || $cmon == $m ]] && \
-           [[ $test_dow == "*" || $test_dow == $dow ]]; }; then
-        tstamp=$(date -d "$y-$m-$d $chour:$cmin" +%s 2>/dev/null)
-        if [[ $tstamp && $tstamp -le $now_ts ]]; then
-          echo $tstamp
-          return
-        fi
+    if { [[ $cday == "*" || $cday == $d ]] && \
+         [[ $cmon == "*" || $cmon == $m ]] && \
+         cron_dow_match "$cdow" "$dow"; }; then
+      tstamp=$(date -d "$y-$m-$d $chour:$cmin" +%s 2>/dev/null)
+      if [[ $tstamp && $tstamp -le $now_ts ]]; then
+        echo $tstamp
+        return
       fi
-    done
+    fi
   done
   echo 0
 }
