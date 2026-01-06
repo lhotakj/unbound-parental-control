@@ -5,11 +5,11 @@ set -e
 show_help() {
   echo "Usage: $0 <config.ini>"
   echo
-  echo "Removes parental-control DNS configuration created by setup-kid-from-ini.sh"
+  echo "Removes parental-control DNS configuration created by setup-rule-from-ini.sh"
   echo
   echo "INI file format must contain at least:"
   echo "[metadata]"
-  echo "kid_name=jonas"
+  echo "rule=jonas"
   exit 0
 }
 
@@ -33,28 +33,26 @@ if [[ ! -f "$INI_FILE" ]]; then
 fi
 
 ### PARSE METADATA ###
-kid_name=$(awk -F= '/^
+rule=$(awk -F= '
+  /^\[metadata\]/{flag=1;next}
+  /^\[/{flag=0}
+  flag && $0 !~ /^#/ && $1=="rule" {print $2}
+' "$INI_FILE")
 
-\[metadata\]
-
-/{flag=1;next}/^
-
-\[/{flag=0}flag && $1=="kid_name"{print $2}' "$INI_FILE")
-
-if [[ -z "$kid_name" ]]; then
-  echo "Error: kid_name missing in [metadata] section."
+if [[ -z "$rule" ]]; then
+  echo "Error: rule missing in [metadata] section."
   exit 1
 fi
 
 ### PATHS ###
 UNBOUND_DIR="/etc/unbound"
-VIEW_FILE="$UNBOUND_DIR/unbound.conf.d/view-$kid_name.conf"
-ALLOW_FILE="$UNBOUND_DIR/$kid_name-allow.conf"
-BLOCK_FILE="$UNBOUND_DIR/$kid_name-blocklist.conf"
-CURRENT_FILE="$UNBOUND_DIR/$kid_name-current.conf"
-CRON_FILE="/etc/cron.d/${kid_name}-dns-schedule"
+VIEW_FILE="$UNBOUND_DIR/unbound.conf.d/view-$rule.conf"
+ALLOW_FILE="$UNBOUND_DIR/${rule}-allow.conf"
+BLOCK_FILE="$UNBOUND_DIR/${rule}-blocklist.conf"
+CURRENT_FILE="$UNBOUND_DIR/${rule}-current.conf"
+CRON_FILE="/etc/cron.d/${rule}-dns-schedule"
 
-echo "=== Removing DNS parental controls for $kid_name ==="
+echo "=== Removing DNS parental controls for $rule ==="
 
 ### REMOVE VIEW ###
 if [[ -f "$VIEW_FILE" ]]; then
@@ -81,4 +79,4 @@ echo "Reloading Unbound..."
 unbound-control reload || systemctl reload unbound
 
 echo "=== DONE ==="
-echo "Parental-control configuration for '$kid_name' has been removed."
+echo "Parental-control configuration for '$rule' has been removed."

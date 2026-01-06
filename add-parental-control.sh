@@ -12,7 +12,7 @@ using Unbound views and cron-based rule switching.
 INI file format:
 
 [metadata]
-kid_name=jonas
+rule=jonas
 allow_cron=0 16 * * *
 allow_cron=0 10 * * 6,0
 block_cron=0 18 * * *
@@ -62,10 +62,10 @@ fi
 ### PARSE METADATA (ignore comments)
 ############################################
 
-kid_name=$(awk -F= '
+rule=$(awk -F= '
   /^\[metadata\]/{flag=1;next}
   /^\[/{flag=0}
-  flag && $0 !~ /^#/ && $1=="kid_name" {print $2}
+  flag && $0 !~ /^#/ && $1=="rule" {print $2}
 ' "$INI_FILE")
 
 mapfile -t allow_cron < <(awk -F= '
@@ -80,8 +80,8 @@ mapfile -t block_cron < <(awk -F= '
   flag && $0 !~ /^#/ && $1=="block_cron" {print $2}
 ' "$INI_FILE")
 
-if [[ -z "$kid_name" ]]; then
-  echo "Error: kid_name missing in [metadata]"
+if [[ -z "$rule" ]]; then
+  echo "Error: rule missing in [metadata]"
   exit 1
 fi
 
@@ -125,13 +125,13 @@ fi
 ############################################
 
 UNBOUND_DIR="/etc/unbound"
-VIEW_FILE="$UNBOUND_DIR/unbound.conf.d/view-$kid_name.conf"
-ALLOW_FILE="$UNBOUND_DIR/$kid_name-allow.conf"
-BLOCK_FILE="$UNBOUND_DIR/$kid_name-blocklist.conf"
-CURRENT_FILE="$UNBOUND_DIR/$kid_name-current.conf"
-CRON_FILE="/etc/cron.d/${kid_name}-dns-schedule"
+VIEW_FILE="$UNBOUND_DIR/unbound.conf.d/view-$rule.conf"
+ALLOW_FILE="$UNBOUND_DIR/$rule-allow.conf"
+BLOCK_FILE="$UNBOUND_DIR/$rule-blocklist.conf"
+CURRENT_FILE="$UNBOUND_DIR/$rule-current.conf"
+CRON_FILE="/etc/cron.d/amanagate-${rule}-dns-schedule"
 
-echo "=== Setting up DNS parental controls for $kid_name ==="
+echo "=== Setting up DNS parental controls for $rule ==="
 
 ############################################
 ### CREATE ALLOW FILE
@@ -165,11 +165,11 @@ mkdir -p "$UNBOUND_DIR/unbound.conf.d"
   echo "server:"
   for ip in "${devices[@]}"; do
     echo "  access-control: $ip allow"
-    echo "  access-control-view: $ip $kid_name"
+    echo "  access-control-view: $ip $rule"
   done
 
   echo "view:"
-  echo "  name: \"$kid_name\""
+  echo "  name: \"$rule\""
   echo "  view-first: yes"
   echo "  include: $CURRENT_FILE"
 } > "$VIEW_FILE"
@@ -181,7 +181,7 @@ mkdir -p "$UNBOUND_DIR/unbound.conf.d"
 echo "Installing cron schedule..."
 
 {
-  echo "# Cron schedule for $kid_name"
+  echo "# Cron schedule for $rule"
   echo "# Automatically generated — do not edit manually"
   echo ""
 
@@ -236,7 +236,7 @@ fi
 ############################################
 
 echo "=== DONE ==="
-echo "Kid: $kid_name"
+echo "Rule: $rule"
 echo "Devices: ${devices[*]}"
 echo "Blocked domains: ${domains[*]}"
 echo "Allow cron rules:"

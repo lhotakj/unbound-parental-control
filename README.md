@@ -76,7 +76,7 @@ The INI file should follow this structure:
 
 ```ini
 [metadata]
-kid_name=<rule_name>
+rule=<rule_name>
 block_cron=<cron_expression_for_blocking>
 allow_cron=<cron_expression_for_allowing>
 
