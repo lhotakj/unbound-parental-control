@@ -163,7 +163,7 @@ done
 ### CREATE SYMLINK
 ############################################
 
-ln -sf "$ALLOW_FILE" "$CURRENT_FILE"
+ln -sfn "$ALLOW_FILE" "$CURRENT_FILE"
 
 ############################################
 ### CREATE VIEW
@@ -196,13 +196,13 @@ echo "Installing cron schedule..."
   echo ""
 
   for cron_rule in "${allow_cron[@]}"; do
-    echo "$cron_rule root ln -sf $ALLOW_FILE $CURRENT_FILE && unbound-control reload"
+    echo "$cron_rule root ln -sfn $ALLOW_FILE $CURRENT_FILE && unbound-control reload"
   done
 
   echo ""
 
   for cron_rule in "${block_cron[@]}"; do
-    echo "$cron_rule root ln -sf $BLOCK_FILE $CURRENT_FILE && unbound-control reload"
+    echo "$cron_rule root ln -sfn $BLOCK_FILE $CURRENT_FILE && unbound-control reload"
   done
 } > "$CRON_FILE"
 
@@ -292,11 +292,11 @@ done
 
 if [[ $best_type == "allow" ]]; then
   echo "Applying allow rule: $best_rule"
-  ln -sf "$ALLOW_FILE" "$CURRENT_FILE"
+  ln -sfn "$ALLOW_FILE" "$CURRENT_FILE"
   reload_unbound
 elif [[ $best_type == "block" ]]; then
   echo "Applying block rule: $best_rule"
-  ln -sf "$BLOCK_FILE" "$CURRENT_FILE"
+  ln -sfn "$BLOCK_FILE" "$CURRENT_FILE"
   reload_unbound
 else
   echo "Unexpectedly no rule matched"
