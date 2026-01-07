@@ -24,12 +24,13 @@ echo "=== Creating directories ==="
 mkdir -p /etc/unbound/custom
 mkdir -p /etc/unbound/unbound.conf.d
 
-echo "=== Creating LAN DNS overrides ==="
+echo "=== Creating LAN DNS A and PTR records ==="
 cat > /etc/unbound/custom/local-lan.conf <<EOF
 $(grep -v '^[[:space:]]*#' "$HOST_FILE" | grep -v '^[[:space:]]*$' | while read -r ip name; do
     # Skip lines that don't have both IP and domain
     if [[ -n "$ip" && -n "$name" ]]; then
       echo "local-data: \"$name A $ip\""
+      echo "local-data-ptr: \"$ip $name\""
     fi
 done)
 EOF
