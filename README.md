@@ -121,7 +121,41 @@ To remove previously configured parental control rules, run:
 sudo ./remove-parental-control.sh ./conf/games.ini
 ```
 
+## Last step - plug the configuration in
 
+Now when you have ready your DNS server you need tell all hosts on your network to use it. Login to your router and set your main DNS to the pi device where your installed AmanaGate.
+
+**Important!** Modern devices (Windows, Android, iOS, Chrome, Firefox, smart TVs…) increasingly bypass the router’s DNS and go straight to:
+
+* 8.8.8.8 / 8.8.4.4 (Google)
+* 1.1.1.1 (Cloudflare)
+* 9.9.9.9 (Quad9)
+* DNS-over-HTTPS (DoH)
+* DNS-over-TLS (DoT)
+
+So even if your router advertises your Unbound server, clients may simply ignore it.
+
+## How to set firewall on ASUS router to block any client to reach external DNS except your DNS where you installed AmanaGate
+
+This script runs automatically every time the firewall restarts.
+
+```
+mkdir -p /jffs/scripts
+vi /jffs/scripts/firewall-start
+```
+Paste this:
+
+```sh
+#!/bin/sh
+
+# Allow DNS only to your Unbound server
+iptables -I FORWARD -p udp --dport 53 ! -d 10.0.0.9 -j DROP
+iptables -I FORWARD -p tcp --dport 53 ! -d 10.0.0.9 -j DROP
+
+# Also block LAN clients from using external DNS directly
+iptables -I OUTPUT -p udp --dport 53 ! -d 10.0.0.9 -j DROP
+iptables -I OUTPUT -p tcp --dport 53 ! -d 10.0.0.9 -j DROP
+```
 ---
 
 ## 🪲 Debugging and Testing
